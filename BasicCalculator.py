@@ -1,6 +1,6 @@
 from tkinter import *
 root = Tk() # blank window
-
+'''-----------------buttons and labels-------------------------------------'''
 var1 = IntVar()
 c1 = Checkbutton(root, text='Mean', variable=var1)
 c1.grid(row=0)
@@ -29,9 +29,22 @@ result3.grid(row=2,column=1)
 result4 = Label(root,text='')
 result4.grid(row=3,column=1)
 
+result5 = Label(root,text='')
+result5.grid(row=0,column=6)
+
+result6 = Label(root,text='Temp: ')
+result6.grid(row=3,column=4)
+
 entry1 = Entry(root)
 entry1.grid(row=4,column=0)
 
+entry2 = Entry(root)
+entry2.grid(row=0,column=4)
+
+entry3 = Entry(root)
+entry3.grid(row=2,column=5)
+
+'''-----------------functions-------------------------------------'''
 def mean(theList):
     count = 0
     total = 0
@@ -49,100 +62,139 @@ def median(theList):
 
 def rms (theList):
     index = 0
+    newList = theList.copy()
     for each in theList:
-        theList[index] = int(theList[index])**2
+        newList[index] = int(theList[index])**2
         index = index + 1
-    return mean(theList) ** (1/2)
+    return mean(newList) ** (1/2)
 
-def middle_average(theList):
-    newList = [0,0,0]
-    newList[0] = mean(theList)
-    newList[1] = median(theList)
-    newList[2] = rms(theList)
-    print(newList)
-    return median(newList)
+def equation(s):
+    if s.find('*') == -1 and s.find('/') == -1 and s.find('+') == -1 and s.find('x') == -1:
+        result5.config(text='Answer: ' + s)
+        return s
 
+    if s.find('*') != -1 or s.find('/') != -1:
+        x1 = 999
+        x2 = 999
+        if s.find('*') != -1:
+            x1 = s.find('*')
+        if s.find('/') != -1:
+            x2 = s.find('/')
+
+        operator_pos = min(x1,x2)
+        part1 = (s[:operator_pos])  # splits the string into its respective sides
+        part2 = (s[operator_pos + 1:])
+
+        index1 = max(part1.rfind('+'), part1.rfind('x'), part1.rfind('/'),part1.rfind('*') )
+        num1 = part1[index1 + 1:]
+
+        v1 = 999
+        v2 = 999
+        v3 = 999
+        v4 = 999
+        if part2.find('+') != -1:
+            v1 = part2.find('+')
+        if part2.find('x') != -1:
+            v2 = part2.find('x')
+        if part2.find('/') != -1:
+            v3 = part2.find('/')
+        if part2.find('*') != -1:
+            v4 = part2.find('*')
+
+        index2 = min(v1, v2, v3, v4)
+        num2 = part2[:index2]
+        if x1 < x2:
+            ans = float(num1) * float(num2)
+
+        else:
+            ans = float(num1) / float(num2)
+
+        newString = s[:index1 + 1] + str(ans) + s[operator_pos + len(num2) + 1:]
+        return equation(newString)
+    if s.find('+') != -1 or s.find('x') != -1:
+        x1 = 999
+        x2 = 999
+        if s.find('+') != -1:
+            x1 = s.find('+')
+        if s.find('x') != -1:
+            x2 = s.find('x')
+        operator_pos = min(x1, x2)
+        part1 = (s[:operator_pos])  # splits the string into its respective sides
+        part2 = (s[operator_pos + 1:])
+
+        index1 = max(part1.rfind('+'), part1.rfind('x'), part1.rfind('/'), part1.rfind('*'))
+        num1 = part1[index1 + 1:]
+
+        v1 = 999
+        v2 = 999
+        v3 = 999
+        v4 = 999
+        if part2.find('+') != -1:
+            v1 = part2.find('+')
+        if part2.find('x') != -1:
+            v2 = part2.find('x')
+        if part2.find('/') != -1:
+            v3 = part2.find('/')
+        if part2.find('*') != -1:
+            v4 = part2.find('*')
+
+        index2 = min(v1, v2, v3, v4)
+        num2 = part2[:index2]
+        if x1 < x2:
+            ans = float(num1) + float(num2)
+        else:
+            ans = float(num1) - float(num2)
+
+        newString = s[:index1 + 1] + str(ans) + s[operator_pos + len(num2) + 1:]
+        return equation(newString)
 
 def doStuff(event):
-
     myList = entry1.get().strip().split()
-
     if var1.get() == 1:
         result1.config(text=mean(myList))
+    else:
+        result1.config(text='')
 
     if var2.get() == 1:
         result2.config(text=median(myList))
+    else:
+        result2.config(text='')
 
     if var3.get() == 1:
         result3.config(text=rms(myList))
+    else:
+        result3.config(text='')
 
     if var4.get() == 1:
-        result4.config(text=middle_average(myList))
+        middleList = [mean(myList),median(myList),rms(myList)]
+        result4.config(text=median(middleList))
+    else:
+        result4.config(text='')
 
+def doStuff2(event):
+    equation(entry2.get().strip().replace('-','x'))
 
-button1 = Button(root, text = 'Calculate')
+def c2f(self):
+    result6.config(text = 'Temp ' + str((float(entry3.get())) * 1.8 + 32))
+
+def f2c(self):
+    result6.config(text = 'Temp ' + str(((float(entry3.get()) - 32) / 1.8)))
+
+button1 = Button(root, text='Calculate')
 button1.bind("<Button-1>", doStuff)
-button1.grid(row=4,column=1)
+button1.grid(row=4, column=1)
 
+button2 = Button(root, text='Equate')
+button2.bind("<Button-1>", doStuff2)
+button2.grid(row=0, column=5)
+
+button3 = Button(root, text='FtoC')
+button3.bind("<Button-1>", f2c)
+button3.grid(row=3, column=5)
+
+button4 = Button(root, text='CtoF')
+button4.bind("<Button-1>", c2f)
+button4.grid(row=4, column=5)
 
 root.title('Basic Calculator')
 root.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-Ctemp = input('What is the temperature in Celsius? ')
-Ctemp = float(Ctemp)
-
-Ftemp = (Ctemp * 1.8 + 32)
-Ftemp = float(Ftemp)
-def c2f(Ctemp):
-    return Ctemp * 1.8 + 32
-
-
-def f2c(Ftemp):
-    return ((Ftemp - 32) / 1.8)
-
-print('It is', Ftemp, "degrees Fahrenheit.")
-
-
-
-#take a expression from a string and calculate it
-def binop(s):
-    if s.find('*') != -1:           #sees which operator the string is using , sets the position of the operator
-        operator_pos = s.find('*')
-        int_one = int(s[:operator_pos])  # splits the string into its respective sides
-        int_two = int(s[operator_pos + 1:])
-        return int_one * int_two
-    elif s.find('/') != -1:
-        operator_pos = s.find('/')
-        int_one = int(s[:operator_pos])  # splits the string into its respective sides
-        int_two = int(s[operator_pos + 1:])
-        return int_one / int_two
-    elif s.find('+') != -1:
-        operator_pos = s.find('+')
-        int_one = int(s[:operator_pos])  # splits the string into its respective sides
-        int_two = int(s[operator_pos + 1:])
-        return int_one + int_two
-    elif s.find('-') != -1:
-        operator_pos = s.find('-')
-        int_one = int(s[:operator_pos])   # splits the string into its respective sides
-        int_two = int(s[operator_pos + 1:])
-        return int_one - int_two
-
-#def equation(s):
-#    if s.find('*') == -1 and s.find('/') == -1 and s.find('+') == -1 and s.find('-') == -1:
-#        return s
-#   if s.find('*') != -1:
-
-
-print(binop("3+7"))
-
